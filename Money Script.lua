@@ -149,4 +149,7 @@ root:button('show it\'s running')
             end
             util.yield()
         end
+
     end)
+
+its test
