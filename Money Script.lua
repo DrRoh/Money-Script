@@ -1,5 +1,5 @@
 local var = {
-        SCRIPT_NAME = 'Dr.Roh & MC MooHyun\'s Script',
+        SCRIPT_NAME = 'Dr.Roh\'s Script',
         SCRIPT_VER = '1.3.0',
         SCRIPT_PATH = paths.script .. 'Money Script.lua',
 
