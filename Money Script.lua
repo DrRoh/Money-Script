@@ -1,6 +1,12 @@
 local var = {
-    SCRIPT_NAME = 'Dr.Roh & MC MooHyun\'s Script',
-    SCRIPT_VER = '1.1.0',
+        SCRIPT_NAME = 'Dr.Roh & MC MooHyun\'s Script',
+        SCRIPT_VER = '1.3.0',
+        SCRIPT_PATH = paths.script .. 'Money Script.lua',
+
+    URL = {
+        VERSION = 'https://raw.githubusercontent.com/DrRoh/Money-Script/refs/heads/main/version',
+        SCRIPT = 'https://raw.githubusercontent.com/DrRoh/Money-Script/refs/heads/main/Money%20Script.lua'
+    },
 
     delay_sec = {
         delay_1 = 500,
@@ -13,7 +19,7 @@ local var = {
 
     limit_flag = {
         limit_selection = 10000000,
-        got = 0,
+        got = 0
     }
 }
 
@@ -49,14 +55,27 @@ local function set_global_i(i)
     script.globals(global_var).int32 = i
 end
 
+local function transaction_yield_maker()
+    for i = 1, 200 do
+        if not game.is_transaction_busy() then
+            return
+        end
+        util.yield(50)
+    end
+    notifyCustom('Transaction time out')
+end
+
 local function loop(opt)
     if stop(opt) then return end
+
     var.loop_flag.is_loop_running = true
 
+    transaction_yield_maker()
     set_global_i(1)
-    
+
     util.yield(var.delay_sec.delay_1)
 
+    transaction_yield_maker()
     set_global_i(0)
     var.limit_flag.got = var.limit_flag.got + 500000
 
@@ -65,10 +84,13 @@ local function loop(opt)
     util.yield(var.delay_sec.delay_2)
     
     if stop(opt) then return end
+
+    transaction_yield_maker()
     set_global_i(2)
 
     util.yield(var.delay_sec.delay_1)
 
+    transaction_yield_maker()
     set_global_i(0)
     var.limit_flag.got = var.limit_flag.got + 750000
 
@@ -83,6 +105,68 @@ end
 
 local function Stat_Changer(stat, value)
     account.stats('MP' .. tostring(account.character()) .. '_' .. stat).int32 = account.stats('MP' .. tostring(account.character()) .. '_' .. stat).int32 + value
+end
+
+local function is_newer_version(my_ver_str, server_ver_str)
+    local my_parts = {}
+    local server_parts = {}
+
+    for num in my_ver_str:gmatch("%d+") do table.insert(my_parts, tonumber(num)) end
+    for num in server_ver_str:gmatch("%d+") do table.insert(server_parts, tonumber(num)) end
+
+    for i = 1, 3 do
+        local my_num = my_parts[i] or 0
+        local server_num = server_parts[i] or 0
+
+        if server_num > my_num then
+            return true
+        elseif server_num < my_num then
+            return false
+        end
+    end
+
+    return false
+end
+
+local function Check_for_update()
+    http.fetch_async(var.URL.VERSION, { method = 'GET' }, function(result)
+        if result.success and result.status == 200 then
+
+            local server_version = result.text:gsub('%s+', '')
+
+            if is_newer_version(var.SCRIPT_VER, server_version) then
+                notifyCustom('New version found: '.. server_version)
+                Update_Script()
+            else
+                notifyCustom('You are on the latest version')
+            end
+        else
+            notifyCustom('[Error] Version check failed')
+        end
+    end)
+end
+
+function Update_Script()
+    http.fetch_async(var.URL.SCRIPT, { method = 'GET' }, function(result)
+        if result.success and result.status == 200 then
+            if file.exists(var.SCRIPT_PATH) then
+                file.remove(var.SCRIPT_PATH)
+            end
+
+            local handle = file.open(var.SCRIPT_PATH, { create_if_not_exists = true, append = false })
+            
+            if handle.valid then
+                handle.text = result.text
+                notifyCustom('updated, please reload')
+                this.unload()
+            else
+                notifyCustom('[Error] fail to update script')
+            end
+
+        else
+            notifyCustom('[Error] fail to check script')
+        end
+    end)
 end
 
 local root = menu.root()
@@ -149,7 +233,8 @@ root:button('show it\'s running')
             end
             util.yield()
         end
-
     end)
 
-its test
+util.create_job(function()
+    Check_for_update()
+end)
