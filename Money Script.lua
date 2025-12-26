@@ -1,7 +1,7 @@
 local var = {
-        SCRIPT_NAME = 'Dr.Roh\'s Script',
-        SCRIPT_VER = '1.3.0',
-        SCRIPT_PATH = paths.script .. 'Money Script.lua',
+    SCRIPT_NAME = 'Dr.Roh\'s Script',
+    SCRIPT_VER = '1.3.1',
+    SCRIPT_PATH = paths.script .. 'Money Script.lua',
 
     URL = {
         VERSION = 'https://raw.githubusercontent.com/DrRoh/Money-Script/refs/heads/main/version',
