@@ -1,6 +1,6 @@
 local var = {
     SCRIPT_NAME = 'Dr.Roh\'s Script',
-    SCRIPT_VER = '1.3.1',
+    SCRIPT_VER = '1.4.0',
     SCRIPT_PATH = paths.script .. 'Money Script.lua',
 
     URL = {
@@ -18,7 +18,7 @@ local var = {
     },
 
     limit_flag = {
-        limit_selection = 10000000,
+        limit_selection = 100000000,
         got = 0
     }
 }
@@ -56,11 +56,12 @@ local function set_global_i(i)
 end
 
 local function transaction_yield_maker()
-    for i = 1, 200 do
+    for i = 1, 600 do
         if not game.is_transaction_busy() then
             return
         end
         util.yield(50)
+        print(tostring(i*50))
     end
     notifyCustom('Transaction time out')
 end
@@ -75,7 +76,6 @@ local function loop(opt)
 
     util.yield(var.delay_sec.delay_1)
 
-    transaction_yield_maker()
     set_global_i(0)
     var.limit_flag.got = var.limit_flag.got + 500000
 
@@ -90,7 +90,6 @@ local function loop(opt)
 
     util.yield(var.delay_sec.delay_1)
 
-    transaction_yield_maker()
     set_global_i(0)
     var.limit_flag.got = var.limit_flag.got + 750000
 
